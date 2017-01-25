@@ -17,6 +17,7 @@ setup(
     install_requires=[
         'numpy',
     ],
+    scripts=['bin/cine'],
     description="Calculate infrared pumping rates by solar radiation",
     long_description=readme(),
     package_data={"": ["LICENSE"]},

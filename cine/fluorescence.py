@@ -27,6 +27,23 @@ def omega(theta):
     return omega
 
 
+def zlamda(levels):
+    """Partition function from LAMDA data
+
+    Parameters
+    ----------
+    levels : pandas DataFrame
+        LAMDA levels table
+
+    Returns
+    -------
+    zlamda : float
+        Partition function
+    """
+    pop = levels['Weight']*np.exp(-constants.h*constants.c*1e2*levels['Energy']/constants.k/50)
+    return pop.sum()
+
+
 def glu(sigma, gu, gl):
     """Pumping rate from lower to upper level glu
     divided by the Einstein coefficient Aul
