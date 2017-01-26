@@ -27,7 +27,7 @@ def omega(theta):
     return omega
 
 
-def zlamda(levels):
+def zlamda(levels, temp):
     """Partition function from LAMDA data
 
     Parameters
@@ -35,16 +35,19 @@ def zlamda(levels):
     levels : pandas DataFrame
         LAMDA levels table
 
+    temp : float
+        Gas temperature
+
     Returns
     -------
     zlamda : float
         Partition function
     """
-    pop = levels['Weight']*np.exp(-constants.h*constants.c*1e2*levels['Energy']/constants.k/50)
+    pop = levels['Weight']*np.exp(-constants.h*constants.c*1e2*levels['Energy']/constants.k/temp)
     return pop.sum()
 
 
-def glu(sigma, gu, gl):
+def glu(sigma, gu, gl, El, Z):
     """Pumping rate from lower to upper level glu
     divided by the Einstein coefficient Aul
     (equation A7 from Crovisier & Encrenaz 1983)
@@ -57,6 +60,12 @@ def glu(sigma, gu, gl):
         upper level degeneracy
     gl : float
         lower level degeneracy
+    El : float
+        energy of lower level in cm-1
+    temp : float
+        gas temperature
+    Z : float
+        partition function
 
     Returns
     -------
@@ -67,7 +76,9 @@ def glu(sigma, gu, gl):
     om = omega(9.35e-3)
     # black-body Sun temperature in K
     Tbb = 5778
-    glu = om/4./np.pi*gu/gl/\
+    # relative population of the lower level
+    pl = gl * np.exp(-constants.h*constants.c*El*1e2/constants.k/50)/Z
+    glu = om/4./np.pi*gu/gl*pl/\
         (np.exp(constants.h*constants.c*sigma*1e2/constants.k/Tbb)-1)
     return glu
 
@@ -162,9 +173,9 @@ class gfactor(object):
     black body radiation field
     """
 
-    def __init__(self, mol):
+    def __init__(self, mol, nlev=False):
         """
-        pumping rates excited by solar radiation ignoring hot bands cascades
+        pumping rates excited by solar radiation ignoring hot band cascades
         """
         self.mol = mol
         # download all transitions of the molecule between the wavenumbers of 0 and 20000 cm-1
@@ -178,8 +189,10 @@ class gfactor(object):
 
         levels = enlevels.to_pandas()
 
-        # create new column using HITRAN notation
+        # create new column for quantum numbers using HITRAN notation
         levels.loc[:,'local_quanta'] = levels['J'].apply(lamda_to_hitran, args=(mol,))
+
+        # create new column for relative population
 
         lamda_levels = levels.Energy.values
         if mol == 'aCH3OH':
@@ -202,14 +215,15 @@ class gfactor(object):
         # hitran_levels = self.tbl[self.tbl['global_lower_quanta'].str.contains(ground_state[mol])]["local_lower_quanta"].unique()
         # nlev = len(hitran_levels)
 
-        nlev = len(lamda_levels)
+        if not nlev:
+            nlev = len(levels)
         self.gcube = np.zeros((nlev, nlev))
 
         # group transitions by common upper level
         grouped = self.trans.groupby(['global_upper_quanta', 'local_upper_quanta'])
 
         # select upper level from any vibrational state different from ground
-        # nu''  u----
+        # nu    u----
         # --------||\----------
         #         || \
         #         ||  \
@@ -218,32 +232,32 @@ class gfactor(object):
         # nu'     ||   3---
         # --------||-----------
         #         |-- 2 (up)
-        # nu     --- 1 (lo)
+        # nu''   --- 1 (lo)
         # ---------------------
+        Z = zlamda(levels[:nlev], 50)
         for _, group in grouped:
-            if len(group) >= 2:
-                # transitions that go to the lamda levels in the ground vibrational state
-                ground = group[
-                    group['global_lower_quanta'].str.contains(ground_state[mol]) &
-                    group['local_lower_quanta'].isin(levels["local_quanta"])
-                    ]
-                if len(ground) >= 2:
-                    # transitions from k to ground level
-                    Asum = group['a'].sum()
-                    # add a new column with glu values (equation A7 from Crovisier & Encrenaz 1983)
-                    ground.loc[:,'glu'] = glu(ground['nu'], ground['gp'], ground['gpp'])
-                    # combination of pairs of possible levels in ground vibrational state
-                    for lo, up in itertools.combinations(ground['local_lower_quanta'], 2):
-                        trans_lo = ground[ground['local_lower_quanta'] == lo]
-                        trans_up = ground[ground['local_lower_quanta'] == up]
-                        # multiply Aeins for the pair
-                        Aprod = ground[ground['local_lower_quanta'].isin([lo, up])]['a'].product()
-                        # g12 += g1u * Au2/(Au1 + Au2 + Au3)
-                        if lo != up:
-                            i = levels[levels["local_quanta"] == lo]["Level"].values[0]
-                            j = levels[levels["local_quanta"] == up]["Level"].values[0]
-                            self.gcube[i-1, j-1] += trans_lo['glu'].values[0]*Aprod/Asum
-                            self.gcube[j-1, i-1] += trans_up['glu'].values[0]*Aprod/Asum
+            # transitions that go to the lamda levels in the ground vibrational state
+            ground = group[
+                group['global_lower_quanta'].str.contains(ground_state[mol]) &
+                group['local_lower_quanta'].isin(levels["local_quanta"][:nlev])
+                ]
+            if len(ground) >= 2:
+                # transitions from k to ground level
+                Asum = group['a'].sum()
+                # add a new column with glu values (equation A7 from Crovisier & Encrenaz 1983)
+                ground.loc[:,'glu'] = glu(ground['nu'], ground['gp'], ground['gpp'], ground['elower'], Z)
+                # combination of pairs of possible levels in ground vibrational state
+                for lo, up in itertools.combinations(ground['local_lower_quanta'], 2):
+                    trans_lo = ground[ground['local_lower_quanta'] == lo]
+                    trans_up = ground[ground['local_lower_quanta'] == up]
+                    # multiply Aeins for the pair
+                    Aprod = ground[ground['local_lower_quanta'].isin([lo, up])]['a'].product()
+                    # g12 += g1u * Au2/(Au1 + Au2 + Au3)
+                    if lo != up:
+                        i = levels[levels["local_quanta"] == lo]["Level"].values[0]
+                        j = levels[levels["local_quanta"] == up]["Level"].values[0]
+                        self.gcube[i-1, j-1] += trans_lo['glu'].values[0]*Aprod/Asum
+                        self.gcube[j-1, i-1] += trans_up['glu'].values[0]*Aprod/Asum
 
 
     def hotbands(self):
@@ -306,6 +320,7 @@ class gfactor(object):
                                 j = levels[levels["local_quanta"] == hbj['local_lower_quanta']]["Level"].values[0]
                                 Aprod = hb['a']*upper1['a'].values[0]
                                 gcube[i-1, j-1] += g_ik*Aprod/Asum*hbj['a']/Asum2
+
 
     def scale(self, rh):
         """
