@@ -1,5 +1,5 @@
 ---
-title: 'A solar-pumped fluorescence model for cometary atmospheres'
+title: 'Cine: A solar-pumped fluorescence model for cometary atmospheres'
 tags:
   - Python
   - Fluorescence
@@ -28,13 +28,13 @@ bibliography: paper.bib
 
 # Summary
 
-CINE is a Python module for calculating infrared pumping efficiencies that can
+*CINE* is a Python module for calculating infrared pumping efficiencies that can
 be applied to the most common molecules found in cometary comae such as water,
 hydrogen cyanide or methanol.  Excitation by solar radiation of vibrational
 bands followed by radiative decay to the ground vibrational state is one of the
 main mechanisms for molecular excitation in comets.  This code calculates the
 effective pumping rates for rotational levels in the ground vibrational state
-scaled by the heliocentric distance of the comet as detailed in @crovisier.
+scaled by the heliocentric distance of the comet as detailed in @bensch and @crovisier.
 Line transitions are queried from the latest version of the HITRAN
 spectroscopic repository [@hitran] using the astroquery affiliated package of
 astropy [@astroquery].  Molecular data are obtained from the LAMDA database
@@ -42,12 +42,12 @@ astropy [@astroquery].  Molecular data are obtained from the LAMDA database
 
 These coefficients are useful for modeling rotational emission lines observed
 in cometary spectra at sub-millimeter wavelengths. Combined with computational
-methods to solve the radiative transfer equations, based e.g. on the Monte
+methods to solve the radiative transfer equations based, e.g., on the Monte
 Carlo algorithm [@lime], this model can retrieve production rates and
 rotational temperatures from the observed emission spectrum.
 
 The code and issue tracker of *CINE* are available on GitHub [@cine_github] and
-any issues can be raised there.  The source code for *CINE* is also available
-from the Python Package Index (PyPI).
+any questions or bug reports can be raised there.  The source code for *CINE*
+is also available from the Python Package Index (PyPI).
 
 # References
