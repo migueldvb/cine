@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+"""
+CINE command line script
+"""
 
 from cine import fluorescence
 
@@ -6,17 +9,20 @@ import argparse
 import numpy as np
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-m", "--mol", default="H2O", choices=fluorescence.lamda.keys(), help="molecule")
-parser.add_argument("-n", "--nlevels", type=int, default=-1, help="number of levels")
-parser.add_argument("-r", "--rh", type=float, default=1., help="heliocentric distance")
+parser.add_argument("-m", "--mol", default="H2O",
+                    choices=fluorescence.lamda.keys(),
+                    help="Molecule name")
+parser.add_argument("-n", "--nlevels", type=int, default=7,
+                    help="Number of rotational levels")
+parser.add_argument("-r", "--rh", type=float, default=1.,
+                    help="Heliocentric distance in AU")
 args = parser.parse_args()
 
 g = fluorescence.gfactor(args.mol, args.nlevels)
 
-# print(gcube[:7,:7])
+# scale infrared pumping rates by heliocentric distance
+g.scale(args.rh)
+
+# Save array using mixed numeric types
 ii,jj = np.nonzero(g.gcube[:args.nlevels,:args.nlevels])
-
-for i,j in zip(ii, jj):
-    print(i+1, j+1, g.gcube[j,i])
-
-# np.savetxt('G_ch3oh.dat', gcube)
+np.savetxt('G_{0}.dat'.format(args.mol), np.transpose((ii, jj, g.gcube[ii,jj])), fmt='%d %d %.6e')
