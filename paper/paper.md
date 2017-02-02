@@ -43,7 +43,7 @@ astropy [@astroquery].  Molecular data are obtained from the LAMDA database
 These coefficients are useful for modeling rotational emission lines observed
 in cometary spectra at sub-millimeter wavelengths. Combined with computational
 methods to solve the radiative transfer equations based, e.g., on the Monte
-Carlo algorithm [@lime], this model can retrieve production rates and
+Carlo algorithm [@crete], this model can retrieve production rates and
 rotational temperatures from the observed emission spectrum.
 
 The code and issue tracker of *CINE* are available on GitHub [@cine_github] and
