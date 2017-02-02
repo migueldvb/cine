@@ -142,12 +142,16 @@ LAMDA_DATA = os.environ.get(
 
 # names in LAMDA database
 lamda = {'H2O': 'oh2o@daniel',
+        'H2CO': 'oh2co-h2',
+        'HCN': 'hcn',
         'HDO': 'hdo',
         'aCH3OH': 'a-ch3oh',
         'eCH3OH': 'e-ch3oh'}
 
 # identifiers in HITRAN database
 hitran_ids = {'H2O': (1,1),
+             'H2CO': (20,1),
+             'HCN': (23,1),
              'HDO': (1,4),
              'aCH3OH': (1,1),
              'eCH3OH': (1,1)}
@@ -281,23 +285,30 @@ ISO = {
 
 # name of ground vibrational state in LAMDA database
 ground_state= {'H2O': b'0 0 0',
+               'H2CO': b'0 0 0 0 0 0',
+               'HCN': b'0 0 0 0',
                'HDO': b'0 0 0',
                'aCH3OH': b'GROUND',
                'eCH3OH': b'GROUND'}
 
 # subset of bands with transitions to ground state
 excitation_band = {'H2O': ['0 0 1', '0 1 0', '1 0 0', '1 0 1', '0 1 1'],
+                   'H2CO': ['0 1 0 0 0 0', '0 0 1 0 0 0', '0 0 0 0 0 1'],
+                   'HCN': ['0 1 1 0', '1 0 0 0', '0 0 0 1'],
                    'HDO': ['0 1 0', '1 0 0', '0 0 1'],
                    'aCH3OH': ['4V12', 'V12', 'V7', 'V8'],
                    'eCH3OH': ['3V12', 'V12', 'V7', 'V8']}
 
 # species identifier
 species = {'H2O': b'',
+           'H2CO': b'',
+           'HCN': b'',
            'HDO': b'',
            'aCH3OH': b'A',
            'eCH3OH': b'E'}
 
 # print(trans[~trans.global_lower_quanta.str.contains(b'0 0 0')])
+
 
 class gfactor(object):
     """
@@ -319,14 +330,14 @@ class gfactor(object):
 
         collrates,radtransitions,enlevels = Lamda.query(mol=lamda[mol])
 
-        levels = enlevels.to_pandas()
+        self.levels = enlevels.to_pandas()
 
         # create new column for quantum numbers using HITRAN notation
-        levels.loc[:,'local_quanta'] = levels['J'].apply(lamda_to_hitran, args=(mol,))
+        self.levels.loc[:,'local_quanta'] = self.levels['J'].apply(lamda_to_hitran, args=(mol,))
 
         # create new column for relative population
 
-        lamda_levels = levels.Energy.values
+        lamda_levels = self.levels.Energy.values
         if mol == 'aCH3OH':
             # Fix a bug in energy levels for aCH3OH in HITRAN 2012
             lamda_levels += 128.1069
@@ -347,8 +358,8 @@ class gfactor(object):
         # hitran_levels = self.tbl[self.tbl['global_lower_quanta'].str.contains(ground_state[mol])]["local_lower_quanta"].unique()
         # nlev = len(hitran_levels)
 
-        if not nlev:
-            nlev = len(levels)
+        if nlev < 1:
+            nlev = len(self.levels)
         self.gcube = np.zeros((nlev, nlev))
 
         # group transitions by common upper level
@@ -366,12 +377,12 @@ class gfactor(object):
         #         |-- 2 (up)
         # nu''   --- 1 (lo)
         # ---------------------
-        Z = zlamda(levels[:nlev], 50)
+        Z = zlamda(self.levels[:nlev], 50)
         for _, group in grouped:
             # transitions that go to the lamda levels in the ground vibrational state
             ground = group[
                 group['global_lower_quanta'].str.contains(ground_state[mol]) &
-                group['local_lower_quanta'].isin(levels["local_quanta"][:nlev])
+                group['local_lower_quanta'].isin(self.levels["local_quanta"][:nlev])
                 ]
             if len(ground) >= 2:
                 # transitions from k to ground level
@@ -386,10 +397,10 @@ class gfactor(object):
                     Aprod = ground[ground['local_lower_quanta'].isin([lo, up])]['a'].product()
                     # g12 += g1u * Au2/(Au1 + Au2 + Au3)
                     if lo != up:
-                        i = levels[levels["local_quanta"] == lo]["Level"].values[0]
-                        j = levels[levels["local_quanta"] == up]["Level"].values[0]
-                        self.gcube[i-1, j-1] += trans_lo['glu'].values[0]*Aprod/Asum
-                        self.gcube[j-1, i-1] += trans_up['glu'].values[0]*Aprod/Asum
+                        i = self.levels[self.levels["local_quanta"] == lo]["Level"].values[0]
+                        j = self.levels[self.levels["local_quanta"] == up]["Level"].values[0]
+                        self.gcube[i-1, j-1] += trans_up['glu'].values[0]*Aprod/Asum
+                        self.gcube[j-1, i-1] += trans_lo['glu'].values[0]*Aprod/Asum
 
 
     def hotbands(self):
@@ -401,16 +412,16 @@ class gfactor(object):
                     self.tbl['global_lower_quanta'].str.contains(ground_state[self.mol])
                     # & ~self.tbl['global_upper_quanta'].str.contains(ground_state[self.mol])
                     & self.tbl['global_upper_quanta'].isin([i.rjust(15).encode('utf-8') for i in excitation_band[self.mol]])
-                    & self.tbl["local_lower_quanta"].isin(levels["local_quanta"])
+                    & self.tbl["local_lower_quanta"].isin(self.levels["local_quanta"])
                     ]
 
-        trans_hb = self.tbl[self.tbl['global_upper_quanta'].isin(trans['global_upper_quanta'])
-                    & self.tbl['local_upper_quanta'].isin(trans['local_upper_quanta'])]
-        grouped2 = trans.groupby(['global_upper_quanta', 'local_upper_quanta'])
+        # trans_hb = self.tbl[self.tbl['global_upper_quanta'].isin(trans['global_upper_quanta'])
+        #             & self.tbl['local_upper_quanta'].isin(trans['local_upper_quanta'])]
+        grouped = trans.groupby(['global_upper_quanta', 'local_upper_quanta'])
 
         # hot bands
         for k, hb in trans.iterrows():
-            i = levels[levels["local_quanta"] == hb['local_lower_quanta']]["Level"].values[0]
+            i = self.levels[self.levels["local_quanta"] == hb['local_lower_quanta']]["Level"].values[0]
             # all transitions from upper level in vibrational state
             ground = self.tbl[self.tbl['global_upper_quanta'].str.contains(hb['global_upper_quanta'], regex=False)
                         & self.tbl['local_upper_quanta'].str.contains(hb['local_upper_quanta'], regex=False)]
@@ -421,37 +432,37 @@ class gfactor(object):
                         & self.tbl['local_upper_quanta'].str.contains(mid['local_upper_quanta'].values[0], regex=False)]
                 # hot band transitions that go to ground state
                 ground3 = ground2[ground2['global_lower_quanta'].str.contains(ground_state[self.mol])
-                                & ground2['local_lower_quanta'].isin(levels['local_quanta'])
+                                & ground2['local_lower_quanta'].isin(self.levels['local_quanta'])
                                 ]
                 for kk, g in ground3.iterrows():
-                    j = levels[levels["local_quanta"] == g['local_lower_quanta']]["Level"].values[0]
+                    j = self.levels[self.levels["local_quanta"] == g['local_lower_quanta']]["Level"].values[0]
                     if i != j:
                         Asum = ground['a'].sum()
                         Aprod = hb['a']*mid['a'].values[0]
                         Asum2 = ground2['a'].sum()
                         g_ik = glu(hb['nu'], hb['gp'], hb['gpp'])
-                        gcube[i-1, j-1] += g_ik*Aprod/Asum*g['a']/Asum2
+                        self.gcube[i-1, j-1] += g_ik*Aprod/Asum*g['a']/Asum2
 
         for name, group in grouped:
             # groups that have transitions to the ground state
             ground = group[group['global_lower_quanta'].str.contains(ground_state[self.mol])
-                    & group['local_lower_quanta'].isin(levels["local_quanta"])]
+                    & group['local_lower_quanta'].isin(self.levels["local_quanta"])]
             if len(ground) >=1:
                 for _, group2 in grouped:
                     upper1 = group2[group2['global_lower_quanta'].str.contains(group['global_upper_quanta'].values[0])
                         & group2['local_lower_quanta'].str.contains(group['local_upper_quanta'].values[0])]
                     upper2 = group2[group2['global_lower_quanta'].str.contains(ground_state[self.mol]) &
-                        group2['local_lower_quanta'].isin(levels["local_quanta"])]
+                        group2['local_lower_quanta'].isin(self.levels["local_quanta"])]
                     if len(upper1) & len(upper2):
                         Asum = group2['a'].sum()
                         Asum2 = ground['a'].sum()
                         for k, hb in upper2.iterrows():
-                            i = levels[levels["local_quanta"] == hb['local_lower_quanta']]["Level"].values[0]
+                            i = self.levels[self.levels["local_quanta"] == hb['local_lower_quanta']]["Level"].values[0]
                             g_ik = glu(hb['nu'], hb['gp'], hb['gpp'])
                             for k, hbj in ground.iterrows():
-                                j = levels[levels["local_quanta"] == hbj['local_lower_quanta']]["Level"].values[0]
+                                j = self.levels[self.levels["local_quanta"] == hbj['local_lower_quanta']]["Level"].values[0]
                                 Aprod = hb['a']*upper1['a'].values[0]
-                                gcube[i-1, j-1] += g_ik*Aprod/Asum*hbj['a']/Asum2
+                                self.gcube[i-1, j-1] += g_ik*Aprod/Asum*hbj['a']/Asum2
 
 
     def scale(self, rh):
