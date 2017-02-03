@@ -9,7 +9,7 @@ def readme():
 
 setup(
     name="cine",
-    version="0.1.1.3",
+    version="0.2",
     author="Miguel de Val-Borro",
     author_email="miguel.deval@gmail.com",
     url="https://github.com/migueldvb/cine",
@@ -37,5 +37,5 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     test_suite='nose.collector',
-    test_require=['nose'],
+    tests_require=['nose'],
 )
