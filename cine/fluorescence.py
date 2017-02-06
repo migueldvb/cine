@@ -9,6 +9,7 @@ from scipy import constants
 import itertools
 import os
 
+
 def omega(theta):
     """Solid angle subtended by the Sun
 
@@ -310,7 +311,7 @@ species = {'H2O': b'',
 # print(trans[~trans.global_lower_quanta.str.contains(b'0 0 0')])
 
 
-class gfactor(object):
+class pumping(object):
     """
     Calculate effective infrared pumping rates excited by solar radiation as a
     black body radiation field
@@ -360,7 +361,7 @@ class gfactor(object):
 
         if nlev < 1:
             nlev = len(self.levels)
-        self.gcube = np.zeros((nlev, nlev))
+        self.gfactor = np.zeros((nlev, nlev))
 
         # group transitions by common upper level
         grouped = self.trans.groupby(['global_upper_quanta', 'local_upper_quanta'])
@@ -399,8 +400,8 @@ class gfactor(object):
                     if lo != up:
                         i = self.levels[self.levels["local_quanta"] == lo]["Level"].values[0]
                         j = self.levels[self.levels["local_quanta"] == up]["Level"].values[0]
-                        self.gcube[i-1, j-1] += trans_up['glu'].values[0]*Aprod/Asum
-                        self.gcube[j-1, i-1] += trans_lo['glu'].values[0]*Aprod/Asum
+                        self.gfactor[i-1, j-1] += trans_up['glu'].values[0]*Aprod/Asum
+                        self.gfactor[j-1, i-1] += trans_lo['glu'].values[0]*Aprod/Asum
 
 
     def hotbands(self):
@@ -441,7 +442,7 @@ class gfactor(object):
                         Aprod = hb['a']*mid['a'].values[0]
                         Asum2 = ground2['a'].sum()
                         g_ik = glu(hb['nu'], hb['gp'], hb['gpp'])
-                        self.gcube[i-1, j-1] += g_ik*Aprod/Asum*g['a']/Asum2
+                        self.gfactor[i-1, j-1] += g_ik*Aprod/Asum*g['a']/Asum2
 
         for name, group in grouped:
             # groups that have transitions to the ground state
@@ -462,11 +463,11 @@ class gfactor(object):
                             for k, hbj in ground.iterrows():
                                 j = self.levels[self.levels["local_quanta"] == hbj['local_lower_quanta']]["Level"].values[0]
                                 Aprod = hb['a']*upper1['a'].values[0]
-                                self.gcube[i-1, j-1] += g_ik*Aprod/Asum*hbj['a']/Asum2
+                                self.gfactor[i-1, j-1] += g_ik*Aprod/Asum*hbj['a']/Asum2
 
 
     def scale(self, rh):
         """
         Scale infrared pumping rates by heliocentric distance
         """
-        self.gcube /= rh**2
+        self.gfactor /= rh**2

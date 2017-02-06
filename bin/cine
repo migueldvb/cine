@@ -18,11 +18,11 @@ parser.add_argument("-r", "--rh", type=float, default=1.,
                     help="Heliocentric distance in AU")
 args = parser.parse_args()
 
-g = fluorescence.gfactor(args.mol, args.nlevels)
+g = fluorescence.pumping(args.mol, args.nlevels)
 
 # scale infrared pumping rates by heliocentric distance
 g.scale(args.rh)
 
 # Save array using mixed numeric types
-ii,jj = np.nonzero(g.gcube[:args.nlevels,:args.nlevels])
-np.savetxt('G_{0}.dat'.format(args.mol), np.transpose((ii, jj, g.gcube[ii,jj])), fmt='%d %d %.6e')
+ii,jj = np.nonzero(g.gfactor[:args.nlevels,:args.nlevels])
+np.savetxt('G_{0}.dat'.format(args.mol), np.transpose((ii, jj, g.gfactor[ii,jj])), fmt='%d %d %.6e')

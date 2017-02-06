@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from .fluorescence import gfactor
+from .fluorescence import pumping
 
-__all__ = ["gfactor"]
+__all__ = ["pumping"]
