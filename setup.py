@@ -18,7 +18,7 @@ setup(
     url="https://github.com/migueldvb/cine",
     packages=["cine"],
     install_requires=[
-        'numpy',
+        'numpy', 'scipy', 'pandas', 'astroquery'
     ],
     scripts=['bin/cine'],
     description="Calculate infrared pumping rates by solar radiation",
