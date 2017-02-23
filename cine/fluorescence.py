@@ -323,7 +323,7 @@ class pumping(object):
         """
         self.mol = mol
         # download all transitions of the molecule between the wavenumbers of 0 and 20000 cm-1
-        download_hitran(*hitran_ids[mol], 0, 30000)
+        download_hitran(*hitran_ids[mol], numin=0, numax=30000)
         mol_name = ISO[hitran_ids[mol]][ISO_INDEX['mol_name']]
         self.tbl = read_hitran_file(os.path.join(HITRAN_DATA, '{0}.data'.format(mol_name))
                                             # formatfile=os.path.join(HITRAN_DATA, 'readme.txt')
