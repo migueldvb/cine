@@ -128,6 +128,16 @@ Any questions or bug reports can be raised in github's `issue tracker
 <https://github.com/migueldvb/cine/pulls>`_.
 
 
+Project Status
+--------------
+
+.. image:: https://travis-ci.org/migueldvb/cine.svg?branch=master
+    :target: https://travis-ci.org/migueldvb/cine?branch=master
+
+.. image:: https://coveralls.io/repos/github/migueldvb/cine/badge.svg?branch=master
+    :target: https://coveralls.io/github/migueldvb/cine?branch=master
+
+
 License
 -------
 
