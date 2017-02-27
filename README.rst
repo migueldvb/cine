@@ -3,14 +3,14 @@ CINE: Comet INfrared Excitation
 ===============================
 
 
-cine is a tool for calculating infrared pumping efficiencies.  At large
-nucleocentric distances, one of the main mechanisms for molecular excitation in
-comets is the fluorescence by the solar radiation followed by radiative decay
-to the ground vibrational state.  This code calculates the effective pumping
-rates for rotational levels in the ground vibrational state scaled by the
-heliocentric distance of the comet.  These coefficients are useful for modeling
-rotational emission lines observed in cometary spectra at sub-millimeter
-wavelengths.
+``cine`` is a command-line tool for calculating infrared pumping efficiencies.
+At large nucleocentric distances, one of the main mechanisms for molecular
+excitation in comets is the fluorescence by the solar radiation followed by
+radiative decay to the ground vibrational state.  This code calculates the
+effective pumping rates for rotational levels in the ground vibrational state
+scaled by the heliocentric distance of the comet.  These coefficients are
+useful for modeling rotational emission lines observed in cometary spectra at
+sub-millimeter wavelengths.
 
 Code releases are available on `PyPI <https://pypi.python.org/pypi/cine>`_, and
 development happens in the `github project page
@@ -39,6 +39,9 @@ or by cloning the github repository:
     $ # Or if you do not have root privileges:
     $ python setup.py install --user
 
+When the package is installed using either method, the ``cine`` script will be
+copied to a directory in the PATH environment variable and will be available
+for general use.
 
 Requirements
 ------------
