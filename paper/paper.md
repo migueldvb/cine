@@ -1,5 +1,5 @@
 ---
-title: 'Cine: A solar-pumped fluorescence model for cometary atmospheres'
+title: 'Cine: Line excitation by infrared fluorescence in cometary atmospheres'
 tags:
   - Python
   - Fluorescence
