@@ -12,7 +12,7 @@ def readme():
 
 setup(
     name="cine",
-    version="0.2",
+    version="0.2.1",
     author="Miguel de Val-Borro",
     author_email="miguel.deval@gmail.com",
     url="https://github.com/migueldvb/cine",
