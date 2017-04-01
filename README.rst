@@ -141,6 +141,29 @@ Project Status
     :target: https://coveralls.io/github/migueldvb/cine?branch=master
 
 
+Citation
+--------
+
+If you wish to cite this work, please use this reference from `NASA's
+Astrophysics Data System
+<https://ui.adsabs.harvard.edu/#abs/2017JOSS.2017..182D/abstract>`_:
+
+.. code-block:: bibtex
+
+    @ARTICLE{2017JOSS.2017..182D,
+       author = {{de Val-Borro}, M. and {Cordiner}, M.~A. and {Milam}, S.~N. and 
+            {Charnley}, S.~B.},
+        title = "{Cine: Line excitation by infrared fluorescence in cometary atmospheres}",
+      journal = {The Journal of Open Source Software},
+         year = 2017,
+        month = mar,
+       volume = 2017,
+          doi = {10.21105/joss.00182},
+       adsurl = {http://adsabs.harvard.edu/abs/2017JOSS.2017..182D},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+    }
+
+
 License
 -------
 
