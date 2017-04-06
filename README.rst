@@ -17,6 +17,17 @@ development happens in the `github project page
 <https://github.com/migueldvb/cine>`_.
 
 
+Requirements
+------------
+
+The code requires the standard scientific Python packages (`numpy
+<http://www.numpy.org/>`_, `scipy <https://www.scipy.org/>`_, and `pandas
+<http://pandas.pydata.org/>`_) and astropy's affiliated package `astroquery
+<https://github.com/astropy/astroquery>`_  to access the HITRAN and Lamda
+databases. Running the tests requires `nose
+<https://pypi.python.org/pypi/nose>`_.
+
+
 Installation
 ------------
 
@@ -42,16 +53,6 @@ or by cloning the github repository:
 When the package is installed using either method, the ``cine`` script will be
 copied to a directory in the PATH environment variable and will be available
 for general use.
-
-Requirements
-------------
-
-The code requires the standard scientific Python packages (`numpy
-<http://www.numpy.org/>`_, `scipy <https://www.scipy.org/>`_, and `pandas
-<http://pandas.pydata.org/>`_) and astropy's affiliated package `astroquery
-<https://github.com/astropy/astroquery>`_  to access the HITRAN and Lamda
-databases. Running the tests requires `nose
-<https://pypi.python.org/pypi/nose>`_.
 
 
 Example
