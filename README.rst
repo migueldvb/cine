@@ -49,7 +49,7 @@ Requirements
 The code requires the standard scientific Python packages (`numpy
 <http://www.numpy.org/>`_, `scipy <https://www.scipy.org/>`_, and `pandas
 <http://pandas.pydata.org/>`_) and astropy's affiliated package `astroquery
-<https://github.com/astropy/astroquery>`_.  to access the HITRAN and Lamda
+<https://github.com/astropy/astroquery>`_  to access the HITRAN and Lamda
 databases. Running the tests requires `nose
 <https://pypi.python.org/pypi/nose>`_.
 
