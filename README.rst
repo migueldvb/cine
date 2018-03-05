@@ -145,6 +145,9 @@ Project Status
 Citation
 --------
 
+.. image:: http://joss.theoj.org/papers/10.21105/joss.00182/status.svg
+    :target: http://joss.theoj.org/papers/10.21105/joss.00182
+
 If you wish to cite this work, please use this reference from `NASA's
 Astrophysics Data System
 <https://ui.adsabs.harvard.edu/#abs/2017JOSS.2017..182D/abstract>`_:
