@@ -154,17 +154,18 @@ Astrophysics Data System
 
 .. code-block:: bibtex
 
-    @ARTICLE{2017JOSS.2017..182D,
-       author = {{de Val-Borro}, M. and {Cordiner}, M.~A. and {Milam}, S.~N. and 
-            {Charnley}, S.~B.},
-        title = "{Cine: Line excitation by infrared fluorescence in cometary atmospheres}",
-      journal = {The Journal of Open Source Software},
-         year = 2017,
-        month = mar,
-       volume = 2017,
-          doi = {10.21105/joss.00182},
-       adsurl = {http://adsabs.harvard.edu/abs/2017JOSS.2017..182D},
-      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+    @ARTICLE{2017JOSS....2..182D,
+           author = {{de Val-Borro}, Miguel and {Cordiner}, Martin A. and {Milam}, Stefanie
+            N. and {Charnley}, Steven B.},
+            title = "{Cine: Line excitation by infrared fluorescence in cometary atmospheres}",
+          journal = {The Journal of Open Source Software},
+             year = 2017,
+            month = Mar,
+           volume = {2},
+            pages = {182},
+              doi = {10.21105/joss.00182},
+           adsurl = {https://ui.adsabs.harvard.edu/#abs/2017JOSS....2..182D},
+          adsnote = {Provided by the SAO/NASA Astrophysics Data System}
     }
 
 
