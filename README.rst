@@ -172,7 +172,7 @@ Astrophysics Data System
 License
 -------
 
-Copyright 2017 Miguel de Val-Borro
+Copyright 2017-2018 Miguel de Val-Borro
 
 ``CINE`` is free software made available under the MIT License.
 For details see the LICENSE file.
