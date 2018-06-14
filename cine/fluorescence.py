@@ -4,7 +4,8 @@ from __future__ import print_function
 
 import numpy as np
 from astroquery.lamda import Lamda
-from astroquery.hitran import read_hitran_file, download_hitran, cache_location
+from astroquery.hitran import Hitran
+import astropy.units as u
 from scipy import constants
 import itertools
 import os
@@ -132,12 +133,7 @@ def lamda_to_hitran(level, mol):
     return quanta.encode('utf-8')
 
 
-# Read path to HITRAN and LAMDA data from environment variable
-HITRAN_DATA = os.environ.get(
-    "HITRAN_DATA",
-    cache_location
-)
-
+# Read path to LAMDA data from environment variable
 LAMDA_DATA = os.environ.get(
     "LAMDA_DATA",
     Lamda.cache_location
@@ -325,10 +321,11 @@ class pumping(object):
         """
         self.mol = mol
         # download all transitions of the molecule between the wavenumbers of 0 and 20000 cm-1
-        download_hitran(*hitran_ids[mol], numin=0, numax=30000)
-        mol_name = ISO[hitran_ids[mol]][ISO_INDEX['mol_name']]
-        self.tbl = read_hitran_file(os.path.join(HITRAN_DATA, '{0}.data'.format(mol_name))
-                                    # formatfile=os.path.join(HITRAN_DATA, 'readme.txt')
+        molecule, isotopologue = hitran_ids[mol]
+        self.tbl = Hitran.query_lines(molecule_number=molecule,
+                                      isotopologue_number=isotopologue,
+                                      min_frequency=0 / u.cm,
+                                      max_frequency=30000 / u.cm,
                                     ).to_pandas()
 
         collrates, radtransitions, enlevels = Lamda.query(mol=lamda[mol])
