@@ -3,10 +3,10 @@
 CINE command line script
 """
 
-from cine import fluorescence
-
 import argparse
 import numpy as np
+
+from cine import fluorescence
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-m", "--mol", default="H2O",
@@ -24,5 +24,6 @@ g = fluorescence.pumping(args.mol, args.nlevels)
 g.scale(args.rh)
 
 # Save array using mixed numeric types
-ii,jj = np.nonzero(g.gfactor[:args.nlevels,:args.nlevels])
-np.savetxt('G_{0}.dat'.format(args.mol), np.transpose((ii, jj, g.gfactor[ii,jj])), fmt='%d %d %.6e')
+ii, jj = np.nonzero(g.gfactor[:args.nlevels, :args.nlevels])
+np.savetxt('G_{0}.dat'.format(args.mol),
+           np.transpose((ii, jj, g.gfactor[ii, jj])), fmt='%d %d %.6e')
