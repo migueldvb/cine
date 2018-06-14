@@ -87,18 +87,18 @@ def glu(sigma, gu, gl, El, Z):
     return glu
 
 
-def hitran_bands(df):
+def hitran_bands(df, mol):
     """Print all bands in HITRAN transitions
 
     Parameters
     ----------
     df : pandas DataFrame
-        HITRAN transitions returned by read_hitran_file
+        HITRAN transitions returned by read_lines
     """
     bands = df.global_upper_quanta.unique()
     for b in bands:
         nu = df[(df.global_upper_quanta.str.contains(b))
-                & (df.global_lower_quanta.str.contains(b'GROUND'))
+                & (df.global_lower_quanta.str.contains(ground_state[mol]))
                 ].nu.mean()
         print(b, nu)
 
@@ -130,6 +130,9 @@ def lamda_to_hitran(level, mol):
         m = re.match('(\d+)_(\d+)_(\d+)', level)
         quanta = m.group(1).rjust(3)+m.group(2).rjust(3) + \
             m.group(3).rjust(3)+'      '
+    elif mol == "HCN":
+        m = re.match('" 0?(\d+) "', level)
+        quanta = m.group(1).rjust(2)
     return quanta.encode('utf-8')
 
 
@@ -332,9 +335,13 @@ class pumping(object):
 
         self.levels = enlevels.to_pandas()
 
+        print(self.levels['J'])
+        print(self.tbl['local_lower_quanta'].unique())
+        print(self.tbl['local_lower_quanta'].str[7:9].unique())
         # create new column for quantum numbers using HITRAN notation
         self.levels.loc[:, 'local_quanta'] = self.levels['J'].apply(
             lamda_to_hitran, args=(mol,))
+        print(self.levels['local_quanta'])
 
         # create new column for relative population
 
@@ -346,7 +353,7 @@ class pumping(object):
         self.trans = self.tbl[
             # select species
             self.tbl["local_lower_quanta"].str.contains(species[mol]) &
-            # select and bands with vibrational transitions to ground state
+            # select bands with vibrational transitions to ground state
             self.tbl['global_upper_quanta'].isin(
                 [i.rjust(15).encode('utf-8') for i in excitation_band[mol]])
             # mol['global_lower_quanta'].str.contains(ground_state[mol]) &
@@ -355,7 +362,7 @@ class pumping(object):
             # & mol["local_lower_quanta"].isin(levels["local_quanta"])
         ]
 
-        # hitran_bands(trans, mol)
+        # hitran_bands(self.tbl, mol)
 
         # hitran_levels = self.tbl[self.tbl['global_lower_quanta'].str.contains(ground_state[mol])]["local_lower_quanta"].unique()
         # nlev = len(hitran_levels)
@@ -385,7 +392,9 @@ class pumping(object):
             # transitions that go to the lamda levels in the ground vibrational state
             ground = group[
                 group['global_lower_quanta'].str.contains(ground_state[mol]) &
-                group['local_lower_quanta'].isin(
+                # group['local_lower_quanta'].str[8:10].isin(
+                # only for HCN
+                group['local_lower_quanta'].str[7:9].isin(
                     self.levels["local_quanta"][:nlev])
             ]
             if len(ground) >= 2:
@@ -404,9 +413,9 @@ class pumping(object):
                     # g12 += g1u * Au2/(Au1 + Au2 + Au3)
                     if lo != up:
                         i = self.levels[self.levels["local_quanta"]
-                                        == lo]["Level"].values[0]
+                                        == lo[7:9]]["Level"].values[0]
                         j = self.levels[self.levels["local_quanta"]
-                                        == up]["Level"].values[0]
+                                        == up[7:9]]["Level"].values[0]
                         self.gfactor[i-1, j -
                                      1] += trans_up['glu'].values[0]*Aprod/Asum
                         self.gfactor[j-1, i -
