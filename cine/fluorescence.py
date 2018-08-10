@@ -132,7 +132,7 @@ def lamda_to_hitran(level, mol):
             m.group(3).rjust(3)+'      '
     elif mol == "HCN":
         m = re.match('" 0?(\d+) "', level)
-        quanta = m.group(1).rjust(2)
+        quanta = m.group(1).rjust(9)+'      '
     return quanta.encode('utf-8')
 
 
@@ -329,19 +329,18 @@ class pumping(object):
                                       isotopologue_number=isotopologue,
                                       min_frequency=0 / u.cm,
                                       max_frequency=30000 / u.cm,
-                                    ).to_pandas()
+                                      ).to_pandas()
 
         collrates, radtransitions, enlevels = Lamda.query(mol=lamda[mol])
 
         self.levels = enlevels.to_pandas()
 
-        print(self.levels['J'])
-        print(self.tbl['local_lower_quanta'].unique())
-        print(self.tbl['local_lower_quanta'].str[7:9].unique())
+        if self.mol == "HCN":
+            # Clean up transition information in local_lower_quanta
+            self.tbl['local_lower_quanta'] = self.tbl.local_lower_quanta.str.decode("utf-8").replace('([PRQef]|1$)', ' ', regex=True).str.encode('utf-8')
         # create new column for quantum numbers using HITRAN notation
         self.levels.loc[:, 'local_quanta'] = self.levels['J'].apply(
             lamda_to_hitran, args=(mol,))
-        print(self.levels['local_quanta'])
 
         # create new column for relative population
 
@@ -392,9 +391,7 @@ class pumping(object):
             # transitions that go to the lamda levels in the ground vibrational state
             ground = group[
                 group['global_lower_quanta'].str.contains(ground_state[mol]) &
-                # group['local_lower_quanta'].str[8:10].isin(
-                # only for HCN
-                group['local_lower_quanta'].str[7:9].isin(
+                group['local_lower_quanta'].isin(
                     self.levels["local_quanta"][:nlev])
             ]
             if len(ground) >= 2:
@@ -413,9 +410,9 @@ class pumping(object):
                     # g12 += g1u * Au2/(Au1 + Au2 + Au3)
                     if lo != up:
                         i = self.levels[self.levels["local_quanta"]
-                                        == lo[7:9]]["Level"].values[0]
+                                        == lo]["Level"].values[0]
                         j = self.levels[self.levels["local_quanta"]
-                                        == up[7:9]]["Level"].values[0]
+                                        == up]["Level"].values[0]
                         self.gfactor[i-1, j -
                                      1] += trans_up['glu'].values[0]*Aprod/Asum
                         self.gfactor[j-1, i -
