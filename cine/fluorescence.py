@@ -155,8 +155,8 @@ hitran_ids = {'H2O': (1, 1),
               'H2CO': (20, 1),
               'HCN': (23, 1),
               'HDO': (1, 4),
-              'aCH3OH': (1, 1),
-              'eCH3OH': (1, 1)}
+              'aCH3OH': (39, 1),
+              'eCH3OH': (39, 1)}
 
 # Copied from the hapi.py code (Academic Free License)
 # http://hitran.org/static/hapi/hapi.py
@@ -350,7 +350,7 @@ class pumping(object):
             lamda_levels += 128.1069
 
         self.trans = self.tbl[
-            # select species
+            # select species (A, E)
             self.tbl["local_lower_quanta"].str.contains(species[mol]) &
             # select bands with vibrational transitions to ground state
             self.tbl['global_upper_quanta'].isin(
