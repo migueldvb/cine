@@ -31,4 +31,4 @@ g.scale(args.rh)
 # Save array using mixed numeric types
 ii, jj = np.nonzero(g.gfactor[:args.nlevels, :args.nlevels])
 np.savetxt('G_{0}.dat'.format(args.molecule),
-           np.transpose((ii, jj, g.gfactor[ii, jj])), fmt='%d %d %.6e')
+           np.transpose((ii+1, jj+1, g.gfactor[ii, jj])), fmt='%d %d %.6e')
