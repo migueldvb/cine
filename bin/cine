@@ -9,21 +9,26 @@ import numpy as np
 from cine import fluorescence
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-m", "--mol", default="H2O",
+parser.add_argument("-m", "--molecule", default="H2O",
                     choices=fluorescence.lamda.keys(),
                     help="Molecule name")
 parser.add_argument("-n", "--nlevels", type=int, default=7,
                     help="Number of rotational levels")
 parser.add_argument("-r", "--rh", type=float, default=1.,
                     help="Heliocentric distance in AU")
+parser.add_argument("-b", "--hotbands", action='store_true',
+                    help="Add contribution from hotbands")
 args = parser.parse_args()
 
-g = fluorescence.pumping(args.mol, args.nlevels)
+g = fluorescence.pumping(args.molecule, args.nlevels)
+
+if args.hotbands:
+    g.hotbands()
 
 # scale infrared pumping rates by heliocentric distance
 g.scale(args.rh)
 
 # Save array using mixed numeric types
 ii, jj = np.nonzero(g.gfactor[:args.nlevels, :args.nlevels])
-np.savetxt('G_{0}.dat'.format(args.mol),
+np.savetxt('G_{0}.dat'.format(args.molecule),
            np.transpose((ii, jj, g.gfactor[ii, jj])), fmt='%d %d %.6e')
